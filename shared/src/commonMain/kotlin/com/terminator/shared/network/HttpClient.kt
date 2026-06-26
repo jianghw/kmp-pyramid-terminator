@@ -17,9 +17,7 @@ fun createHttpClient(tokenProvider: () -> String? = { null }): HttpClient {
                 ignoreUnknownKeys = true
             })
         }
-        
-        install(HttpRequestBuilder)
-        
+
         defaultRequest {
             url {
                 protocol = URLProtocol.HTTP
@@ -27,11 +25,8 @@ fun createHttpClient(tokenProvider: () -> String? = { null }): HttpClient {
                 port = 8080
             }
             contentType(ContentType.Application.Json)
-        }
-        
-        requestInterceptors.add { request ->
             tokenProvider()?.let { token ->
-                request.headers.append(HttpHeaders.Authorization, "Bearer $token")
+                headers.append(HttpHeaders.Authorization, "Bearer $token")
             }
         }
     }

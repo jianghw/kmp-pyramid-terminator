@@ -2,7 +2,7 @@ package com.terminator.shared.network.api
 
 import com.terminator.shared.model.ApiResponse
 import com.terminator.shared.model.PaginatedResponse
-import com.terminator.shared.network.HttpClient
+import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -47,7 +47,7 @@ class AIApi(private val httpClient: HttpClient) {
     ): ApiResponse<AIQuestionResponse> {
         // 发送POST请求到 /api/ai/ask
         // setBody() 会自动将数据对象序列化为JSON
-        return httpClient.client.post("/api/ai/ask") {
+        return httpClient.post("/api/ai/ask") {
             setBody(AIQuestionRequest(
                 question = question,
                 context = context,
@@ -74,7 +74,7 @@ class AIApi(private val httpClient: HttpClient) {
         bankId: Long?,
         questionType: String?
     ): ApiResponse<QuestionEntryResponse> {
-        return httpClient.client.post("/api/ai/search") {
+        return httpClient.post("/api/ai/search") {
             setBody(SearchQuestionRequest(
                 keyword = keyword,
                 bankId = bankId,
@@ -93,7 +93,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 当前用户的所有AI配置（API密钥已脱敏处理）
      */
     suspend fun getAIConfigs(): ApiResponse<List<AIConfigResponse>> {
-        return httpClient.client.get("/api/ai-configs").body()
+        return httpClient.get("/api/ai-configs").body()
     }
 
     /**
@@ -103,7 +103,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 指定配置的详细信息
      */
     suspend fun getAIConfig(configId: Long): ApiResponse<AIConfigResponse> {
-        return httpClient.client.get("/api/ai-configs/$configId").body()
+        return httpClient.get("/api/ai-configs/$configId").body()
     }
 
     /**
@@ -113,7 +113,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 创建成功后的配置信息
      */
     suspend fun createAIConfig(request: CreateAIConfigRequest): ApiResponse<AIConfigResponse> {
-        return httpClient.client.post("/api/ai-configs") {
+        return httpClient.post("/api/ai-configs") {
             setBody(request)
         }.body()
     }
@@ -126,7 +126,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun updateAIConfig(configId: Long, request: CreateAIConfigRequest): ApiResponse<Unit> {
-        return httpClient.client.put("/api/ai-configs/$configId") {
+        return httpClient.put("/api/ai-configs/$configId") {
             setBody(request)
         }.body()
     }
@@ -138,7 +138,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun deleteAIConfig(configId: Long): ApiResponse<Unit> {
-        return httpClient.client.delete("/api/ai-configs/$configId").body()
+        return httpClient.delete("/api/ai-configs/$configId").body()
     }
 
     /**
@@ -148,7 +148,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun toggleAIConfig(configId: Long): ApiResponse<Unit> {
-        return httpClient.client.put("/api/ai-configs/$configId/toggle").body()
+        return httpClient.put("/api/ai-configs/$configId/toggle").body()
     }
 
     // ==========================================
@@ -161,7 +161,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 当前用户的所有题库
      */
     suspend fun getQuestionBanks(): ApiResponse<List<QuestionBankResponse>> {
-        return httpClient.client.get("/api/question-banks").body()
+        return httpClient.get("/api/question-banks").body()
     }
 
     /**
@@ -171,7 +171,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 指定题库的详细信息
      */
     suspend fun getQuestionBank(bankId: Long): ApiResponse<QuestionBankResponse> {
-        return httpClient.client.get("/api/question-banks/$bankId").body()
+        return httpClient.get("/api/question-banks/$bankId").body()
     }
 
     /**
@@ -181,7 +181,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 创建成功后的题库信息
      */
     suspend fun createQuestionBank(request: CreateQuestionBankRequest): ApiResponse<QuestionBankResponse> {
-        return httpClient.client.post("/api/question-banks") {
+        return httpClient.post("/api/question-banks") {
             setBody(request)
         }.body()
     }
@@ -194,7 +194,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun updateQuestionBank(bankId: Long, request: CreateQuestionBankRequest): ApiResponse<Unit> {
-        return httpClient.client.put("/api/question-banks/$bankId") {
+        return httpClient.put("/api/question-banks/$bankId") {
             setBody(request)
         }.body()
     }
@@ -206,7 +206,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun deleteQuestionBank(bankId: Long): ApiResponse<Unit> {
-        return httpClient.client.delete("/api/question-banks/$bankId").body()
+        return httpClient.delete("/api/question-banks/$bankId").body()
     }
 
     /**
@@ -216,7 +216,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 题库中的所有题目列表
      */
     suspend fun getQuestionEntries(bankId: Long): ApiResponse<List<QuestionEntryResponse>> {
-        return httpClient.client.get("/api/question-banks/$bankId/entries").body()
+        return httpClient.get("/api/question-banks/$bankId/entries").body()
     }
 
     /**
@@ -227,7 +227,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 添加成功后的题目信息
      */
     suspend fun createQuestionEntry(bankId: Long, request: CreateQuestionEntryRequest): ApiResponse<QuestionEntryResponse> {
-        return httpClient.client.post("/api/question-banks/$bankId/entries") {
+        return httpClient.post("/api/question-banks/$bankId/entries") {
             setBody(request)
         }.body()
     }
@@ -240,7 +240,7 @@ class AIApi(private val httpClient: HttpClient) {
      * @return 操作结果
      */
     suspend fun deleteQuestionEntry(bankId: Long, entryId: Long): ApiResponse<Unit> {
-        return httpClient.client.delete("/api/question-banks/$bankId/entries/$entryId").body()
+        return httpClient.delete("/api/question-banks/$bankId/entries/$entryId").body()
     }
 }
 
