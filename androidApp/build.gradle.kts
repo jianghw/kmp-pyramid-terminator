@@ -80,5 +80,5 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test:rules:1.6.1")
-    debugImplementation(libs.compose.ui.test.manifest)
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.6")
 }
