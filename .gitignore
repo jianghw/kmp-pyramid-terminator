@@ -27,6 +27,11 @@ out/
 *.swp
 *~
 
+### Android Signing ###
+*.jks
+*.keystore
+androidApp/keystore.properties
+
 ### macOS ###
 .DS_Store
 .AppleDouble
