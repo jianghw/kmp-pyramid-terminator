@@ -260,7 +260,7 @@ class BatchExecutionRepository(
             } else 0f,
             totalRewardPoints = results
                 .filter { it.status == ExecutionStatus.COMPLETED }
-                .sumOf { 10 },
+                .sumOf { 10.toInt() },
             status = progress.status
         )
     }
