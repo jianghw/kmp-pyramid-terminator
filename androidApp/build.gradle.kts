@@ -44,7 +44,6 @@ dependencies {
     implementation(compose.material3)
     implementation(compose.ui)
     implementation(compose.components.resources)
-    implementation(libs.compose.navigation)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.koin.compose)
