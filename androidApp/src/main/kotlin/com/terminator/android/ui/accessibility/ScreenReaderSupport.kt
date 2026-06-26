@@ -10,16 +10,17 @@ import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.collectionInfo
-import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 
 fun Modifier.accessibleHeading(): Modifier = this.semantics { heading() }
 
@@ -27,7 +28,7 @@ fun Modifier.accessibleDescription(description: String): Modifier = this.semanti
     contentDescription = description
 }
 
-fun Modifier.accessibleLiveRegion(): Modifier = this.semantics { liveRegion = true }
+fun Modifier.accessibleLiveRegion(): Modifier = this.semantics { liveRegion = LiveRegionMode.Assertive }
 
 fun Modifier.accessibleButton(label: String): Modifier = this.semantics {
     contentDescription = label
@@ -40,23 +41,19 @@ fun Modifier.accessibleListItem(
     description: String
 ): Modifier = this.semantics {
     contentDescription = description
-    collectionItemInfo {
-        CollectionItemInfo(
-            rowIndex = listIndex,
-            rowSpan = 1,
-            columnIndex = 0,
-            columnSpan = 1
-        )
-    }
+    collectionItemInfo = CollectionItemInfo(
+        rowIndex = listIndex,
+        rowSpan = 1,
+        columnIndex = 0,
+        columnSpan = 1
+    )
 }
 
 fun Modifier.accessibleList(columnCount: Int = 1): Modifier = this.semantics {
-    collectionInfo {
-        CollectionInfo(
-            rowCount = -1,
-            columnCount = columnCount
-        )
-    }
+    collectionInfo = CollectionInfo(
+        rowCount = -1,
+        columnCount = columnCount
+    )
 }
 
 fun Modifier.accessibleSwitch(

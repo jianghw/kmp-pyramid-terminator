@@ -12,7 +12,6 @@ jobs:
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -62,7 +61,6 @@ jobs:
   build-macos:
     name: Build macOS Desktop App
     runs-on: macos-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -112,7 +110,6 @@ jobs:
   build-linux:
     name: Build Linux Desktop App
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -138,7 +135,6 @@ jobs:
   build-ios:
     name: Build iOS Framework
     runs-on: macos-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -178,7 +174,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-        continue-on-error: true
 
       - name: Prepare release assets
         run: |

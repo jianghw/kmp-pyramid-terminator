@@ -35,17 +35,14 @@ compose.desktop {
             
             macOS {
                 bundleID = "com.terminator.desktop"
-                iconFile.set(project.file("src/jvmMain/resources/icon.icns"))
             }
             
             windows {
-                iconFile.set(project.file("src/jvmMain/resources/icon.ico"))
                 menuGroup = "KMP Terminator"
                 upgradeUuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
             }
             
             linux {
-                iconFile.set(project.file("src/jvmMain/resources/icon.png"))
             }
         }
     }

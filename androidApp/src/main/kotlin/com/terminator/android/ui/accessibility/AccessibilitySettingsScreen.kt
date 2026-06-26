@@ -109,7 +109,7 @@ private fun FontScaleSection(preferences: AccessibilityPreferences) {
 
         Slider(
             value = preferences.fontScale,
-            onValueChange = { preferences.setFontScale(it) },
+            onValueChange = { preferences.updateFontScale(it) },
             valueRange = 0.8f..2.0f,
             steps = 11,
             modifier = Modifier.semantics {

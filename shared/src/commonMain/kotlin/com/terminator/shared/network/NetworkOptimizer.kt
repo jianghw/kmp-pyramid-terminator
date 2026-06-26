@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.minutes
 
 class NetworkOptimizer {
@@ -27,7 +28,7 @@ class NetworkOptimizer {
     ): T {
         mutex.withLock {
             val cached = cache[key]
-            if (cached != null && System.currentTimeMillis() - cached.timestamp < cached.ttl) {
+            if (cached != null && Clock.System.now().toEpochMilliseconds() - cached.timestamp < cached.ttl) {
                 @Suppress("UNCHECKED_CAST")
                 return cached.data as T
             }
@@ -38,7 +39,7 @@ class NetworkOptimizer {
         mutex.withLock {
             cache[key] = CacheEntry(
                 data = result as Any,
-                timestamp = System.currentTimeMillis(),
+                timestamp = Clock.System.now().toEpochMilliseconds(),
                 ttl = ttlMinutes.minutes.inWholeMilliseconds
             )
         }

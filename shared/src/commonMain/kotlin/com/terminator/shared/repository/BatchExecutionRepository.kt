@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.util.UUID
+import kotlin.random.Random
 
 class BatchExecutionRepository(
     private val taskApi: TaskApi,
@@ -38,7 +38,17 @@ class BatchExecutionRepository(
         scope: CoroutineScope
     ): Result<BatchExecution> {
         return try {
-            val batchId = UUID.randomUUID().toString()
+            val batchId = buildString {
+                repeat(8) { append(Random.nextInt(0, 16).toString(16)) }
+                append('-')
+                repeat(4) { append(Random.nextInt(0, 16).toString(16)) }
+                append('-')
+                repeat(4) { append(Random.nextInt(0, 16).toString(16)) }
+                append('-')
+                repeat(4) { append(Random.nextInt(0, 16).toString(16)) }
+                append('-')
+                repeat(12) { append(Random.nextInt(0, 16).toString(16)) }
+            }
             isCancelled = false
 
             val initialResults = tasks.map { template ->

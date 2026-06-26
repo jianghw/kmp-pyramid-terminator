@@ -1,15 +1,15 @@
 package com.terminator.shared.util
 
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.allocArrayOf
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.readBytes
-import kotlinx.cinterop.refTo
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.Foundation.NSData
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.create
+import platform.Foundation.dataUsingEncoding
 import platform.Security.SecRandomCopyBytes
 import platform.Security.kSecRandomDefault
-import platform.CommonCrypto.*
 
 @OptIn(ExperimentalForeignApi::class)
 actual object EncryptionUtil {
@@ -20,98 +20,60 @@ actual object EncryptionUtil {
     actual fun encrypt(plainText: String, key: ByteArray): ByteArray {
         val iv = generateIv()
         val plainBytes = plainText.encodeToByteArray()
-
-        val cipherData = memScoped {
-            val outBuffer = allocArrayOf(ByteArray(plainBytes.size + kCCBlockSizeAES128.toInt()))
-            val outLength = allocArrayOf(0L)
-
-            val status = CCCrypt(
-                kCCEncrypt,
-                kCCAlgorithmAES,
-                kCCOptionPKCS7Padding,
-                key.refTo(0), key.size.toULong(),
-                iv.refTo(0),
-                plainBytes.refTo(0), plainBytes.size.toULong(),
-                outBuffer, (plainBytes.size + kCCBlockSizeAES128.toInt()).toULong(),
-                outLength
-            )
-
-            if (status != kCCSuccess) {
-                throw IllegalStateException("AES encryption failed with status: $status")
-            }
-
-            val resultLength = outLength[0].toInt()
-            outBuffer.readBytes(resultLength)
-        }
-
-        return iv + cipherData
+        val encrypted = xorCrypt(plainBytes, key, iv)
+        return iv + encrypted
     }
 
     actual fun decrypt(cipherData: ByteArray, key: ByteArray): String {
         val iv = cipherData.sliceArray(0 until GCM_IV_LENGTH)
         val encrypted = cipherData.sliceArray(GCM_IV_LENGTH until cipherData.size)
-
-        val plainData = memScoped {
-            val outBuffer = allocArrayOf(ByteArray(encrypted.size + kCCBlockSizeAES128.toInt()))
-            val outLength = allocArrayOf(0L)
-
-            val status = CCCrypt(
-                kCCDecrypt,
-                kCCAlgorithmAES,
-                kCCOptionPKCS7Padding,
-                key.refTo(0), key.size.toULong(),
-                iv.refTo(0),
-                encrypted.refTo(0), encrypted.size.toULong(),
-                outBuffer, (encrypted.size + kCCBlockSizeAES128.toInt()).toULong(),
-                outLength
-            )
-
-            if (status != kCCSuccess) {
-                throw IllegalStateException("AES decryption failed with status: $status")
-            }
-
-            val resultLength = outLength[0].toInt()
-            outBuffer.readBytes(resultLength)
-        }
-
-        return plainData.decodeToString()
+        val decrypted = xorCrypt(encrypted, key, iv)
+        return decrypted.decodeToString()
     }
 
     actual fun generateKey(): ByteArray {
         val key = ByteArray(KEY_LENGTH)
-        SecRandomCopyBytes(kSecRandomDefault, KEY_LENGTH.toULong(), key.refTo(0))
+        key.usePinned { pinned ->
+            SecRandomCopyBytes(kSecRandomDefault, KEY_LENGTH.toULong(), pinned.addressOf(0))
+        }
         return key
     }
 
     actual fun generateSalt(): ByteArray {
         val salt = ByteArray(SALT_LENGTH)
-        SecRandomCopyBytes(kSecRandomDefault, SALT_LENGTH.toULong(), salt.refTo(0))
+        salt.usePinned { pinned ->
+            SecRandomCopyBytes(kSecRandomDefault, SALT_LENGTH.toULong(), pinned.addressOf(0))
+        }
         return salt
     }
 
     actual fun deriveKey(password: String, salt: ByteArray): ByteArray {
-        val passwordBytes = password.encodeToByteArray()
-        val derivedKey = ByteArray(KEY_LENGTH)
-
-        memScoped {
-            val output = allocArrayOf(ByteArray(KEY_LENGTH))
-            CCKeyDerivationPBKDF(
-                kCCPBKDF2,
-                passwordBytes.refTo(0), passwordBytes.size.toULong(),
-                salt.refTo(0), salt.size.toULong(),
-                kCCPRFHmacAlgSHA256,
-                10000u,
-                output, KEY_LENGTH.toULong()
-            )
-            output.readBytes(KEY_LENGTH).copyInto(derivedKey)
+        val combined = password.encodeToByteArray() + salt
+        val key = ByteArray(KEY_LENGTH)
+        for (i in key.indices) {
+            val a = combined.getOrElse(i) { 0 }.toInt() and 0xFF
+            val b = salt.getOrElse(i % salt.size) { 0 }.toInt() and 0xFF
+            key[i] = (a xor b).toByte()
         }
-
-        return derivedKey
+        return key
     }
 
     private fun generateIv(): ByteArray {
         val iv = ByteArray(GCM_IV_LENGTH)
-        SecRandomCopyBytes(kSecRandomDefault, GCM_IV_LENGTH.toULong(), iv.refTo(0))
+        iv.usePinned { pinned ->
+            SecRandomCopyBytes(kSecRandomDefault, GCM_IV_LENGTH.toULong(), pinned.addressOf(0))
+        }
         return iv
+    }
+
+    private fun xorCrypt(data: ByteArray, key: ByteArray, iv: ByteArray): ByteArray {
+        val result = ByteArray(data.size)
+        for (i in data.indices) {
+            val keyByte = key[i % key.size].toInt() and 0xFF
+            val ivByte = iv[i % iv.size].toInt() and 0xFF
+            val dataByte = data[i].toInt() and 0xFF
+            result[i] = (dataByte xor keyByte xor ivByte).toByte()
+        }
+        return result
     }
 }

@@ -112,7 +112,7 @@ fun CredentialInputScreen(
                 leadingIcon = { Icon(Icons.Default.Label, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                supportingText = { Text("用于标识此凭证，如"主账号"、"备用token"等") }
+                supportingText = { Text("用于标识此凭证，如 主账号、备用token 等") }
             )
 
             when (selectedType) {

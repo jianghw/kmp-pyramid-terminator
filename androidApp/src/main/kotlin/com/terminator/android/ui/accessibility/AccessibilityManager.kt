@@ -33,7 +33,7 @@ class AccessibilityPreferences {
     var isGuideCompleted by mutableStateOf(false)
         private set
 
-    fun setFontScale(scale: Float) {
+    fun updateFontScale(scale: Float) {
         fontScale = scale.coerceIn(0.8f, 2.0f)
     }
 
